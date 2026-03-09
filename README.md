@@ -1,79 +1,178 @@
 # Monty Hall Problem — Monte Carlo Simulation
 
-This repository contains a **Monte Carlo simulation of the Monty Hall problem**, implemented in **Python and Julia**, to empirically verify the theoretical probabilities of different strategies.
+This repository studies the **Monty Hall problem** from a probabilistic and computational perspective. The objective is to compare the **theoretical solution derived from probability theory** with **empirical results obtained through Monte Carlo simulation**.
 
-The goal is to compare the **stick** and **switch** strategies through large numbers of trials and observe how the experimental probabilities converge to the theoretical values.
+The simulation is implemented in **Python and Julia** in order to verify that the long‑run frequencies converge to the theoretical probabilities predicted by the mathematical model.
 
 ---
 
-## The Monty Hall Problem
+# The Monty Hall Problem
 
-The Monty Hall problem is a well-known puzzle in probability theory, named after **Monty Hall**, the host of the television game show *Let's Make a Deal*.
+The Monty Hall problem is a classical example in probability theory that illustrates how **conditional probability and information revealed during a process can dramatically change optimal decision strategies**.
 
-The setup is as follows:
+The problem is named after **Monty Hall**, host of the television game show *Let's Make a Deal*.
 
-* A contestant faces **three closed boxes**.
-* **One box contains a prize**, while the other two are empty.
-* The contestant selects one box.
-* The host, who **knows where the prize is**, opens one of the remaining boxes that **does not contain the prize**.
-* The contestant is then given a choice:
+The game proceeds as follows:
 
-1. **Stick** with the original box
-2. **Switch** to the other unopened box
+1. A contestant faces **three closed boxes**.
+2. Exactly **one box contains a prize**, while the other two contain nothing.
+3. The contestant selects one box.
+4. The host, who **knows the location of the prize**, opens one of the remaining boxes that **does not contain the prize**.
+5. The contestant is then offered a choice:
 
-The key question is:
+* **Stick** with the original box
+* **Switch** to the other unopened box
+
+The central question is:
 
 > Does switching improve the probability of winning?
 
+Many people intuitively believe that after one empty box is opened the remaining two boxes should each have probability 1/2. However, this reasoning ignores the **information contained in the host's action**.
+
 ---
 
-## Theoretical Result
+# Theoretical Result
 
-The correct strategy is to **switch**.
+The optimal strategy is to **switch boxes**.
 
 | Strategy | Probability of Winning |
 | -------- | ---------------------- |
 | Stick    | 1/3                    |
 | Switch   | 2/3                    |
 
-Switching doubles the probability of winning because the initial choice has only a **1/3 chance** of being correct. When the host reveals an empty box, the remaining unopened box inherits the remaining probability mass.
+Thus, switching **doubles the probability of winning**.
 
 ---
 
-## Monte Carlo Simulation
+# Probabilistic Analysis
 
-To verify this result experimentally, a Monte Carlo simulation is performed.
+Let
 
-The simulation runs the game many times and records the win rates for both strategies.
+* (W_i) denote the event that the prize is behind box *i*
+* (H_j) denote the event that the host opens box *j*
 
-As the number of trials increases:
+Assume the contestant initially selects **Box 1**.
 
-* The **stick strategy converges to approximately 0.333**
-* The **switch strategy converges to approximately 0.667**
+The prior probabilities are
 
-This behavior demonstrates the **law of large numbers**.
+[
+P(W_1) = P(W_2) = P(W_3) = \frac{1}{3}
+]
+
+The host's strategy is constrained by the rules of the game:
+
+* The host **never opens the prize box**.
+* The host **always opens a box that was not selected**.
+
+If the contestant initially chooses the correct box (probability 1/3), the host randomly opens one of the two remaining empty boxes.
+
+If the contestant initially chooses incorrectly (probability 2/3), the host is **forced** to open the only empty box available.
 
 ---
 
-## Running the Simulation
+# Conditional Probability
+
+Suppose the contestant chooses Box 1 and the host opens Box 3.
+
+Using Bayes' theorem:
+
+[
+P(W_1 | H_3) = \frac{P(H_3 | W_1) P(W_1)}{P(H_3)}
+]
+
+where
+
+* (P(W_1) = 1/3)
+* (P(H_3 | W_1) = 1/2)
+* (P(H_3 | W_2) = 1)
+
+After computing the posterior probabilities we obtain
+
+[
+P(W_1 | H_3) = \frac{1}{3}
+]
+
+and therefore
+
+[
+P(W_2 | H_3) = \frac{2}{3}
+]
+
+Thus the unopened box that was **not initially chosen** carries probability **2/3**, which explains why switching is advantageous.
+
+---
+
+# Enumeration of All Possible Outcomes
+
+Another way to understand the result is to enumerate all possible cases.
+
+Assume the prize is behind Box 1.
+
+| Initial Choice | Host Opens | Stick Result | Switch Result |
+| -------------- | ---------- | ------------ | ------------- |
+| Box 1          | Box 2 or 3 | Win          | Lose          |
+| Box 2          | Box 3      | Lose         | Win           |
+| Box 3          | Box 2      | Lose         | Win           |
+
+Out of the three equally likely possibilities:
+
+* sticking wins in **1 case**
+* switching wins in **2 cases**
+
+Therefore
+
+[
+P(\text{switch wins}) = \frac{2}{3}
+]
+
+---
+
+# Monte Carlo Simulation
+
+Although the analytical solution is straightforward, the Monty Hall problem is famous because the result is **highly counterintuitive**.
+
+For this reason the repository includes **Monte Carlo simulations** to empirically verify the theoretical probabilities.
+
+If the experiment is repeated (N) times, the estimated probabilities are
+
+[
+\hat{P}_{stick} = \frac{\text{stick wins}}{N}
+]
+
+[
+\hat{P}_{switch} = \frac{\text{switch wins}}{N}
+]
+
+By the **law of large numbers**:
+
+[
+\hat{P}*{stick} \to \frac{1}{3}, \qquad
+\hat{P}*{switch} \to \frac{2}{3}
+]
+
+as (N \to \infty).
+
+---
+
+# Running the Simulation
 
 ### Python
 
-```bash
+```
 python monty_hall.py
 ```
 
 ### Julia
 
-```bash
+```
 julia monty_hall.jl
 ```
 
-Both implementations perform the same experiment and should produce similar results.
+Both implementations run the same experiment and should produce statistically similar results.
 
 ---
 
-## Repository Structure
+# Repository Structure
 
 ```
 monty-hall-simulation
@@ -90,6 +189,14 @@ monty-hall-simulation
 
 ---
 
-## Author
+# References
 
-Alpaslan Kılıç
+Selvin, S. (1975). *A problem in probability.* The American Statistician.
+
+vos Savant, M. (1990). *Ask Marilyn.* Parade Magazine.
+
+Gill, R. (2011). *The Monty Hall Problem is not a probability puzzle.* Statistica Neerlandica.
+
+---
+
+Author: **Alpaslan Kılıç**
